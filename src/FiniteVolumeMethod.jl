@@ -1,6 +1,7 @@
 module FiniteVolumeMethod
 
     using FullyThreadedTree
+    using Lazy
 
     include("grid.jl")
 
