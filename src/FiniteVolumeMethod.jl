@@ -1,25 +1,31 @@
 module FiniteVolumeMethod
 
-    using FullyThreadedTree
-    using Lazy
+    import FullyThreadedTree
+    import FullyThreadedTree: Tree, Face, plot, at_boundary, at_refinement, regular, active, level, parent_of_active, initialized, faces
 
+    export Tree,
+           Face,
+           plot,
+           at_boundary,
+           at_refinement,
+           regular,
+           active,
+           level,
+           parent_of_active,
+           initialized
+           
     include("grid.jl")
 
     export Grid,
-           index
-
+           index,
+           refine!,
+           coarsen!
 
     include("interface.jl")
 
     export show,
            faces,
-           cells,
-           active_cells,
-           parens_of_active_cell,
-           boundary_faces,
-           refinement_faces,
-           regular_faces,
-           active_faces
+           cells
 
     include("operators.jl")
 

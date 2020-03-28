@@ -1,11 +1,8 @@
-@forward Grid.tree FullyThreadedTree.faces
-@forward Grid.tree FullyThreadedTree.cells,
-@forward Grid.tree FullyThreadedTree.active_cells,
-@forward Grid.tree FullyThreadedTree.parents_of_active_cell,
-@forward Grid.tree FullyThreadedTree.boundary_faces,
-@forward Grid.tree FullyThreadedTree.refinement_faces,
-@forward Grid.tree FullyThreadedTree.regular_faces,
-@forward Grid.tree FullyThreadedTree.active_faces
+@inline faces(grid::Grid; filter::Function = face -> true, min_level::Int = 0, max_level::Int = typemax(Int)) = FullyThreadedTree.all_faces(grid.tree, filter = filter, min_level = min_level, max_level = max_level)
+@inline faces(grid::Grid, level::Int; filter::Function = face -> true) = FullyThreadedTree.all_faces(grid.tree, level, filter = filter)
+
+@inline cells(grid::Grid; filter::Function = cell -> true, min_level = 0, max_level = typemax(Int)) = FullyThreadedTree.cells(grid.tree; filter = filter, min_level = min_level, max_level = max_level)
+@inline cells(grid::Grid, level::Int; filter::Function = cell -> true) = FullyThreadedTree.cells(grid.tree, level, filter = filter)
 
 function show(grid::Grid)
 

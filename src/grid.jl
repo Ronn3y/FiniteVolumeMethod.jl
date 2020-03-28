@@ -1,16 +1,25 @@
-abstract type AbstractGrid end
+abstract type AbstractGrid{N} end
 
-mutable struct Grid <: AbstractGrid
-    tree::Tree
-    nr_faces
-    nr_cells
+mutable struct Grid{N} <: AbstractGrid{N}
+    tree::Tree{N}
+    nr_cells::Int
+    nr_faces::Int
+
+    cell_index_queue::Vector{Int64}
+    face_index_queue::Vector{Int64}
 end
 
-function Grid(position::Vector; periodic = fill(false, length(position)))
-    grid = Grid(Tree(position, periodic = periodic))
-    set_indices!(grid)
-    return grid
+@inline function Grid(position::Vector; periodic = fill(false, length(position)))
+    if isa(periodic, Bool) periodic = fill(periodic, length(position)) end
+    Grid(Tree(position, periodic = periodic, cell_state = cell -> 1, face_state = face -> 2 + count(periodic)), 1, 2 + count(periodic), Vector{Int64}(), Vector{Int64}())
 end
+
+@inline function refine!(grid::Grid{N}, cells::Vector{Tree{N}}; recurse = false) where N
+    FullyThreadedTree.refine!(cells, cell_state = cell -> cell_incrementer(grid), face_state = face -> face_incrementer(grid), recurse = recurse)
+end
+
+@inline cell_incrementer(grid::Grid) = isempty(grid.cell_index_queue) ? grid.nr_cells += 1 : pop!(grid.cell_index_queue)
+@inline face_incrementer(grid::Grid) = isempty(grid.face_index_queue) ? grid.nr_faces += 1 : pop!(grid.face_index_queue)
 
 abstract type AbstractGridVar end
 
@@ -18,21 +27,5 @@ struct CellVar <: AbstractGridVar
     data::Vector
 end
 
-function set_indices!(grid::Grid)
-    index = 0
-    for cell ∈ cells(grid)
-        index += 1
-        cell.state = index
-    end
-    grid.nr_cells = index
-
-    index = 0
-    for face ∈ faces(grid)
-        index += 1
-        face.state = index
-    end
-    grid.nr_faces = index
-    return nothing
-end
 @inline index(cell::Tree) = cell.state
 @inline index(face::Face) = face.state
