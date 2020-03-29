@@ -1,7 +1,7 @@
 module FiniteVolumeMethod
 
     import FullyThreadedTree
-    import FullyThreadedTree: Tree, Face, centroid, at_boundary, at_refinement, regular, active, level, parent_of_active, initialized, faces, levels
+    import FullyThreadedTree: Tree, Face, centroid, at_boundary, at_refinement, regular, active, level, parent_of_active, initialized, cells, faces, levels, face_area, area, volume, cell_volume
 
     export Tree,
            Face,
@@ -11,14 +11,17 @@ module FiniteVolumeMethod
            active,
            level,
            parent_of_active,
-           initialized
+           initialized,
+           centroid
 
     include("grid.jl")
 
     export Grid,
            index,
            refine!,
-           coarsen!
+           coarsen!,
+           CellVar,
+           FaceVar
 
     include("interface.jl")
 
