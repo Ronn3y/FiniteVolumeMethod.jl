@@ -7,13 +7,16 @@ mutable struct Grid{N} <: AbstractGrid{N}
 
     cells::Vector{Tree{N}}
     faces::Vector{Face{N}}
+
+    cells_level_start::Vector{Int}
+    faces_level_start::Vector{Int}
 end
 
 @inline function Grid(position::Vector; periodic = fill(false, length(position)))
     if isa(periodic, Bool) periodic = fill(periodic, length(position)) end
     tmp = 0
     N = length(position)
-    grid = Grid(Tree(position, periodic = periodic, cell_state = cell -> Ref(1), face_state = face -> Ref(tmp += 1)), 1, 4 - count(periodic), fill(Tree{N}(), 0), fill(Face{N}(), 0))
+    grid = Grid(Tree(position, periodic = periodic, cell_state = cell -> Ref(1), face_state = face -> Ref(tmp += 1)), 1, 4 - count(periodic), fill(Tree{N}(), 0), fill(Face{N}(), 0), zeros(Int64, 0), zeros(Int64, 0))
 
     update_cells!(grid)
     update_faces!(grid)
@@ -47,21 +50,34 @@ end
 
 function update_cells!(grid::Grid)
     grid.cells = FullyThreadedTree.collect_cells(grid.tree)
-    sort(grid.cells, by = level)
+    sort!(grid.cells, by = level)
 end
 function update_faces!(grid::Grid)
     grid.faces = FullyThreadedTree.collect_faces(grid.tree)
-    sort(grid.faces, by = level)
+    sort!(grid.faces, by = level)
 end
 
 function update_indices!(grid::Grid)
     grid.nr_cells = 0
+    current_level = 0
+    grid.cells_level_start = zeros(Int, level(grid.cells[end]))
     for cell ∈ grid.cells
         cell.state.x = grid.nr_cells += 1
+        if level(cell) > current_level
+            current_level = current_level + 1
+            grid.cells_level_start[current_level] = grid.nr_cells
+        end
     end
+
     grid.nr_faces = 0
+    current_level = 0
+    grid.faces_level_start = zeros(Int, level(grid.faces[end]))
     for face ∈ grid.faces
         face.state.x = grid.nr_faces += 1
+        if level(face) > current_level
+            current_level = current_level + 1
+            grid.faces_level_start[current_level] = grid.nr_faces
+        end
     end
 end
 @inline index(cell::Tree) = cell.state.x
