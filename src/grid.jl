@@ -70,7 +70,7 @@ end
 # TODO this does not work with periodicity at level 0
 function normal_sign(cell::Tree, face::Face)
     if at_boundary(face)
-        return +1
+        return active(face.cells[1]) ? +1 : -1
     elseif !at_refinement(face)
         return index(cell) == index(face.cells[1]) ? +1 : -1
     else
@@ -87,16 +87,16 @@ struct FaceVar <: AbstractGridVar
     data::Vector
 end
 
-function CellVar(fun::Function, grid::Grid)
+function CellVar(fun::Function, grid::Grid; initialize = x -> true)
     data = zeros(grid.nr_cells)
-    for cell ∈ filter(active, grid.cells)
+    for cell ∈ filter(initialize, grid.cells)
         data[index(cell)] = fun(centroid(cell))
     end
     return CellVar(data)
 end
-function FaceVar(fun::Function, grid::Grid)
+function FaceVar(fun::Function, grid::Grid; initialize = x -> true)
     data = zeros(grid.nr_faces)
-    for face ∈ filter(active, grid.faces)
+    for face ∈ filter(initialize, grid.faces)
         vec = fun(centroid(face))
         data[index(face)] = vec[FullyThreadedTree.direction(face)]
     end

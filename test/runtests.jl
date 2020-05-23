@@ -22,29 +22,49 @@ using Test
     grids = [uniform, refined]
     orders = [2, 1]
 
-    lInf_linear = zeros(max_steps)
-    lInf_nonlinear = zeros(max_steps)
+    div_lInf_linear = zeros(max_steps)
+    div_lInf_nonlinear = zeros(max_steps)
+    grad_lInf_linear = zeros(max_steps)
+    grad_lInf_nonlinear = zeros(max_steps)
     for (i, grid) ∈ enumerate(grids)
         for step=1:max_steps
             FiniteVolumeMethod.refine!(grid, [grid.tree], recurse=true)
 
+            # Gradient:
             p = CellVar(x -> pi + 7x[1] - 4x[2], grid)
-            gExact = FaceVar(x -> [7, -4], grid)
+            gExact = FaceVar(x -> [7, -4], grid, initialize = active)
             g = gradient(p, grid)
-            lInf_linear[step] = maximum(abs.(g.data - gExact.data))
+            grad_lInf_linear[step] = maximum(abs.(g.data - gExact.data))
 
             p = CellVar(x -> pi + 7sin(x[1]) - 4x[1]x[2]^2, grid)
-            gExact = FaceVar(x -> [7cos(x[1]) - 4x[2]^2, -8x[1]x[2]], grid)
+            gExact = FaceVar(x -> [7cos(x[1]) - 4x[2]^2, -8x[1]x[2]], grid, initialize = active)
             g = gradient(p, grid)
-            lInf_nonlinear[step] = maximum(abs.(g.data - gExact.data))
+            grad_lInf_nonlinear[step] = maximum(abs.(g.data - gExact.data))
+
+            # divergence:
+            u = FaceVar(x -> [x[1] - pi, x[2] - 1], grid)
+            dExact = CellVar(x -> 2., grid, initialize = active)
+            d = divergence(u, grid)
+            div_lInf_linear[step] = maximum(abs.(d.data - dExact.data))
+
+            u = FaceVar(x -> [cos(x[1]) - pi*x[2], sin(x[2]) - x[1]^2], grid)
+            dExact = CellVar(x -> cos(x[2]) - sin(x[1]), grid, initialize = active)
+            d = divergence(u, grid)
+            div_lInf_nonlinear[step] = maximum(abs.(d.data - dExact.data))
         end
 
-        # Gradient of a linear function should be exact
-        @test all(lInf_linear .== 0.0)
+        # Approximate derivative of a linear function should be exact
+        @test all(grad_lInf_linear .== 0.0)
+        @test all(div_lInf_linear .== 0.0)
 
-        # Gradient of a nonlinear function should be second order accurate (uniform)
+        # Approximate derivative of a nonlinear function should be second order accurate (uniform)
         # and first order accurate at refinement interfaces
-        order = log2.(lInf_nonlinear[1:max_steps-1] ./ lInf_nonlinear[2:max_steps])
-        @test all(abs.(order .- orders[i]) .< 1E-1)
+        grad_order = log2.(grad_lInf_nonlinear[1:max_steps-1] ./ grad_lInf_nonlinear[2:max_steps])
+        div_order = log2.(div_lInf_nonlinear[1:max_steps-1] ./ div_lInf_nonlinear[2:max_steps])
+        @test all(abs.(grad_order .- orders[i]) .< 1E-1)
+        @test all(abs.(div_order .- orders[i]) .< 1E-1)
+
+        println(div_lInf_linear)
+        println(div_lInf_nonlinear)
     end
 end
