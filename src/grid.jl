@@ -108,3 +108,6 @@ function FaceVar(fun::Function, grid::Grid)
     end
     return FaceVar(data)
 end
+
+@inline value(x::CellVar, cell::Tree) = x.data[index(cell)]
+@inline value(x::FaceVar, cell::Tree) = x.data[index(cell)]

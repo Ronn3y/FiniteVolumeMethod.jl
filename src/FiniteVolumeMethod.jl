@@ -34,6 +34,12 @@ module FiniteVolumeMethod
     export gradient,
            divergence
 
+    include("functionals.jl")
+
+    export integral,
+           inner_product,
+           norm
+
     include("plotting.jl")
 
     export plot
