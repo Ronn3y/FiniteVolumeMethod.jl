@@ -9,3 +9,15 @@ function gradient(var::CellVar, grid::Grid)
     end
     return FaceVar(grad)
 end
+
+function divergence(var::FaceVar, grid::Grid)
+    div = zeros(eltype(var.data), grid.nr_cells)
+    for cell ∈ filter(active, grid.cells)
+        val = zero(eltype(var.data))
+        for face ∈ FullyThreadedTree.faces(cell)
+            val = FullyThreadedTree.face_area(cell, face) * normal_sign(cell, face) * value(var, face)
+        end
+        div[index(cell)] = val /= FullyThreadedTree.volume(cell)
+    end
+    return FaceVar(div)
+end

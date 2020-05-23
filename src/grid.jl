@@ -69,18 +69,12 @@ end
 
 # TODO this does not work with periodicity at level 0
 function normal_sign(cell::Tree, face::Face)
-    if !at_refinement(face)
-        if index(cell) == index(face.cells[1])
-            return +1
-        else
-            return -1
-        end
+    if at_boundary(face)
+        return +1
+    elseif !at_refinement(face)
+        return index(cell) == index(face.cells[1]) ? +1 : -1
     else
-        if level(cell) == level(face.cells[1])
-            return +1
-        else
-            return -1
-        end
+        return level(cell) == level(face.cells[1]) ? +1 : -1
     end
 end
 
@@ -110,4 +104,4 @@ function FaceVar(fun::Function, grid::Grid)
 end
 
 @inline value(x::CellVar, cell::Tree) = x.data[index(cell)]
-@inline value(x::FaceVar, cell::Tree) = x.data[index(cell)]
+@inline value(x::FaceVar, cell::Face) = x.data[index(cell)]
