@@ -71,10 +71,10 @@ end
 function normal_sign(cell::Tree, face::Face)
     if at_boundary(face)
         return active(face.cells[1]) ? +1 : -1
-    elseif !at_refinement(face)
+    else#if !at_refinement(face)
         return index(cell) == index(face.cells[1]) ? +1 : -1
-    else
-        return level(cell) == level(face.cells[1]) ? +1 : -1
+    # else
+    #     return level(cell) == level(face.cells[1]) ? +1 : -1
     end
 end
 
@@ -87,16 +87,16 @@ struct FaceVar <: AbstractGridVar
     data::Vector
 end
 
-function CellVar(fun::Function, grid::Grid; initialize = x -> true)
+function CellVar(fun::Function, grid::Grid; filter = x -> true)
     data = zeros(grid.nr_cells)
-    for cell ∈ filter(initialize, grid.cells)
+    for cell ∈ Base.filter(filter, grid.cells)
         data[index(cell)] = fun(centroid(cell))
     end
     return CellVar(data)
 end
-function FaceVar(fun::Function, grid::Grid; initialize = x -> true)
+function FaceVar(fun::Function, grid::Grid; filter = x -> true)
     data = zeros(grid.nr_faces)
-    for face ∈ filter(initialize, grid.faces)
+    for face ∈ Base.filter(filter, grid.faces)
         vec = fun(centroid(face))
         data[index(face)] = vec[FullyThreadedTree.direction(face)]
     end
