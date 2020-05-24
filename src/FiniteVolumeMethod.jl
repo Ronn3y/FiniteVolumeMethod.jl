@@ -14,14 +14,22 @@ module FiniteVolumeMethod
            initialized,
            centroid
 
-    include("grid.jl")
+    include("abstract.jl")
 
-    export Grid,
+    export CellVar,
+           FaceVar,
+           size
+
+    include("treegrid.jl")
+
+    export TreeGrid,
            index,
            refine!,
-           coarsen!,
-           CellVar,
-           FaceVar
+           coarsen!
+
+    include("cartesiangrid.jl")
+
+    export CartesianGrid
 
     include("interface.jl")
 

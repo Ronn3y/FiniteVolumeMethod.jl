@@ -1,6 +1,6 @@
 import Plots, Plots.plot, Plots.annotate!, Plots.current, Plots.text, Plots.font
 
-function plot(grid::Grid{2}; markers::Bool = false, max_marker_level::Int = 5, path::Bool = false, indices = false, filter::Function = active)
+function plot(grid::TreeGrid{2}; markers::Bool = false, max_marker_level::Int = 5, path::Bool = false, indices = false, filter::Function = active)
     FullyThreadedTree.plot(grid.tree, markers = markers, max_marker_level = max_marker_level, path = path, filter = filter)
     if indices
         max_level = levels(grid.tree) - 1

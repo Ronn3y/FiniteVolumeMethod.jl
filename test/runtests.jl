@@ -7,7 +7,7 @@ using Test
     ref_steps = 2
 
     for dim=1:3
-        uniform = Grid(zeros(dim))
+        uniform = TreeGrid(zeros(dim))
         vec = 1 : dim
         vec2 = dim : -1 : 1
 
@@ -17,7 +17,7 @@ using Test
         end
 
         # Locally refined grid
-        refined = Grid(zeros(dim))
+        refined = TreeGrid(zeros(dim))
         child = refined.tree
         for step=1:init_steps
             FiniteVolumeMethod.refine!(refined, [child])
