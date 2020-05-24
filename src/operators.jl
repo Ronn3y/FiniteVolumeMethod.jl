@@ -1,27 +1,26 @@
 function gradient(var::CellVar, grid::TreeGrid; filter = active)
-    grad = zeros(eltype(var.data), grid.nr_faces)
-    for face ∈ faces(grid, filter = filter)
-        val = zero(eltype(var.data))
+    grad = FaceVar(zeros(eltype(var), size(FaceVar, grid)))
+    @inbounds for face ∈ faces(grid, filter = filter)
+        val = zero(eltype(var))
         for cell ∈ FullyThreadedTree.cells(face)
-            val -= FullyThreadedTree.face_area(cell, face) * normal_sign(cell, face) * value(var, cell)
+            val -= FullyThreadedTree.face_area(cell, face) * normal_sign(cell, face) * var[cell]
         end
-        grad[index(face)] = val /= FullyThreadedTree.cell_volume(face)
+        grad[face] = val /= FullyThreadedTree.cell_volume(face)
     end
-    return FaceVar(grad)
+    return grad
 end
 
 function divergence(var::FaceVar, grid::TreeGrid; filter = active)
-    div = zeros(eltype(var.data), grid.nr_cells)
-    for cell ∈ cells(grid, filter = filter)
-        val = zero(eltype(var.data))
+    div = CellVar(zeros(eltype(var), size(CellVar, grid)))
+    @inbounds for cell ∈ cells(grid, filter = filter)
+        val = zero(eltype(var))
         for face ∈ FullyThreadedTree.faces(cell)
-            val += FullyThreadedTree.area(face) * normal_sign(cell, face) * value(var, face)
+            val += FullyThreadedTree.area(face) * normal_sign(cell, face) * var[face]
         end
-        div[index(cell)] = val /= FullyThreadedTree.volume(cell)
+        div[cell] = val /= FullyThreadedTree.volume(cell)
     end
-    return CellVar(div)
+    return div
 end
-
 
 function gradient(var::CellVar, grid::CartesianGrid)
 

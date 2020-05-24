@@ -1,7 +1,7 @@
 function integral(x::CellVar, grid::TreeGrid; filter::Function = active)
     int = zero(eltype(x.data))
     for cell ∈ cells(grid, filter = filter)
-        int += volume(cell) * value(x, cell)
+        @inbounds int += volume(cell) * x[cell]
     end
     return int
 end
@@ -9,7 +9,7 @@ end
 function inner_product(x::CellVar, y::CellVar, grid::TreeGrid; filter::Function = active)
     int = zero(eltype(x.data))
     for cell ∈ cells(grid, filter = filter)
-        int += volume(cell) * value(x, cell) * value(y, cell)
+        @inbounds int += volume(cell) * x[cell] * y[cell]
     end
     return int
 end

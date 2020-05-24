@@ -94,3 +94,4 @@ function normal_sign(cell::Tree, face::Face)
     #     return level(cell) == level(face.cells[1]) ? +1 : -1
     end
 end
+@inline direction(face::Face) = face.face_direction

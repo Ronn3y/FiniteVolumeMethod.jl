@@ -29,7 +29,10 @@ module FiniteVolumeMethod
 
     include("cartesiangrid.jl")
 
-    export CartesianGrid
+    export CartesianGrid,
+           area,
+           volume,
+           cell_volume
 
     include("interface.jl")
 
