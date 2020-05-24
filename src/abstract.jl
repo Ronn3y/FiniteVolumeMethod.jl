@@ -21,10 +21,15 @@ import Base: getindex, setindex!, firstindex, lastindex, size
 @inline getindex(var::AbstractGridVar, i::Int) = getindex(var.data, i)
 @inline getindex(var::AbstractGridVar, I::Vararg{Int, N}) where N = getindex(var.data, I...)
 @inline getindex(var::AbstractGridVar, c::Colon) = getindex(var.data, c::Colon)
+@inline getindex(var::AbstractGridVar, i::Base.AbstractCartesianIndex) = getindex(var.data, i)
+@inline getindex(var::AbstractGridVar, i::AbstractRange) = getindex(var.data, i)
 @inline getindex(var::AbstractGridVar, i) = getindex(var.data, index(i))
 
 @inline setindex!(var::AbstractGridVar, v, i::Int) = setindex!(var.data, v, i)
 @inline setindex!(var::AbstractGridVar, v, I::Vararg{Int, N}) where N = setindex!(var.data, v, I...)
+@inline setindex!(var::AbstractGridVar, v, i::Colon) = setindex!(var.data, v, i)
+@inline setindex!(var::AbstractGridVar, v, i::Base.AbstractCartesianIndex) = setindex!(var.data, v, i)
+@inline setindex!(var::AbstractGridVar, v, i::AbstractRange) = setindex!(var.data, v, i)
 @inline setindex!(var::AbstractGridVar, v, i) = setindex!(var.data, v, index(i))
 
 @inline firstindex(var::AbstractGridVar) = firstindex(var.data)
